@@ -3,9 +3,6 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: '//array//',
-  description: 'Personal link hub with Frutiger Aero aesthetic',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
