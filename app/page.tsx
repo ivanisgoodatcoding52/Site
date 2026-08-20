@@ -1,9 +1,5 @@
 import Link from "next/link";
 
-/* ---------------------------------------------------------------------- */
-/* Content — edit these arrays to update the page without touching markup */
-/* ---------------------------------------------------------------------- */
-
 const TICKER = [
   "REACT",
   "NEXT.JS",
