@@ -1,6 +1,25 @@
 "use client";
 
 import { useState } from "react";
+import { JetBrains_Mono, Roboto } from "next/font/google";
+
+/* ---------------------------------------------------------------------- */
+/* Fonts — JetBrains Mono is Android Studio's actual default editor font;  */
+/* Roboto is Google's own UI face, used for anything meant to read as      */
+/* rendered content rather than source.                                    */
+/* ---------------------------------------------------------------------- */
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-mono",
+});
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-sans",
+});
 
 /* ---------------------------------------------------------------------- */
 /* Darcula-ish syntax colors, matched to the Android Studio screenshot     */
@@ -13,234 +32,460 @@ const PARAM = "text-[#67d6ef]"; // object keys / params
 const STR = "text-[#a5c261]"; // strings
 const COM = "text-[#7a7e85] italic"; // comments
 const MUT = "text-[#a9b7c6]"; // punctuation
+const HEADER = "text-[#5794d1] font-bold"; // markdown headings
+const INLINE = "rounded bg-[#2b2d30] px-1 text-[#e2b273]"; // inline `code`
+
+function Code({ children }: { children: React.ReactNode }) {
+  return <span className={INLINE}>{children}</span>;
+}
 
 type FileId = "home" | "about" | "skills" | "work" | "contact";
 
 const FILE_META: Record<FileId, { label: string; dot: string; ext: string }> = {
   home: { label: "Home.tsx", dot: "#57965c", ext: "TSX" },
   about: { label: "About.tsx", dot: "#57965c", ext: "TSX" },
-  skills: { label: "Skills.tsx", dot: "#57965c", ext: "TSX" },
-  work: { label: "Work.tsx", dot: "#57965c", ext: "TSX" },
+  skills: { label: "SKILLS.md", dot: "#519aba", ext: "MD" },
+  work: { label: "WORK.md", dot: "#519aba", ext: "MD" },
   contact: { label: "Contact.tsx", dot: "#57965c", ext: "TSX" },
 };
 
 /* ---------------------------------------------------------------------- */
-/* Code — placeholder content, replace with real copy later                */
+/* Line data — { text, block } where block=true marks a fenced code line   */
+/* so it gets an inset background like a real markdown code-fence render.  */
 /* ---------------------------------------------------------------------- */
 
-const CODE: Record<FileId, React.ReactNode[]> = {
+type LineData = { text: React.ReactNode; block?: boolean };
+const L = (text: React.ReactNode, block = false): LineData => ({ text, block });
+
+const CODE: Record<FileId, LineData[]> = {
   home: [
-    <span key="0">
-      <span className={KW}>export default function</span> <span className={FN}>Hero</span>
-      <span className={MUT}>() {"{"}</span>
-    </span>,
-    <span key="1">
-      {"  "}
-      <span className={KW}>return</span> <span className={MUT}>{"{"}</span>
-    </span>,
-    <span key="2">
-      {"    "}
-      <span className={PARAM}>name</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'//array//'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="3">
-      {"    "}
-      <span className={PARAM}>tagline</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'[Add your one-line tagline here]'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="4">
-      {"    "}
-      <span className={PARAM}>status</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'[Add your availability status]'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="5">
-      {"  "}
-      <span className={MUT}>{"};"}</span>
-    </span>,
-    <span key="6">
-      <span className={MUT}>{"}"}</span>
-    </span>,
-  ],
-
-  about: [
-    <span key="0" className={COM}>
-      // TODO: write this
-    </span>,
-    <span key="1">
-      <span className={KW}>export const</span> <span className={PARAM}>about</span>{" "}
-      <span className={MUT}>= {"{"}</span>
-    </span>,
-    <span key="2">
-      {"  "}
-      <span className={PARAM}>roles</span>
-      <span className={MUT}>: [</span>
-    </span>,
-    <span key="3">
-      {"    "}
-      <span className={STR}>'Full-Stack Developer'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="4">
-      {"    "}
-      <span className={STR}>'App Developer'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="5">
-      {"    "}
-      <span className={STR}>'Electrical Design'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="6">
-      {"  "}
-      <span className={MUT}>],</span>
-    </span>,
-    <span key="7">
-      {"  "}
-      <span className={PARAM}>bio</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>`[Write a short bio here — what you build,</span>
-    </span>,
-    <span key="8">
-      <span className={STR}>{"    how you think, what you're into.]`"}</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="9">
-      <span className={MUT}>{"};"}</span>
-    </span>,
-  ],
-
-  skills: [
-    <span key="0" className={COM}>
-      // pinout — what I build
-    </span>,
-    <span key="1">
-      <span className={KW}>export const</span> <span className={PARAM}>skills</span>{" "}
-      <span className={MUT}>= [</span>
-    </span>,
-    ...["01", "02", "03"].flatMap((pin, i, arr) => [
-      <span key={`o-${i}`}>
+    L(
+      <span>
+        <span className={KW}>export default function</span> <span className={FN}>Hero</span>
+        <span className={MUT}>() {"{"}</span>
+      </span>
+    ),
+    L(
+      <span>
         {"  "}
-        <span className={MUT}>{"{"}</span>
-      </span>,
-      <span key={`p-${i}`}>
-        {"    "}
-        <span className={PARAM}>pin</span>
-        <span className={MUT}>: </span>
-        <span className={STR}>'{pin}'</span>
-        <span className={MUT}>,</span>
-      </span>,
-      <span key={`t-${i}`}>
-        {"    "}
-        <span className={PARAM}>title</span>
-        <span className={MUT}>: </span>
-        <span className={STR}>'[Category]'</span>
-        <span className={MUT}>,</span>
-      </span>,
-      <span key={`s-${i}`}>
-        {"    "}
-        <span className={PARAM}>tools</span>
-        <span className={MUT}>: [</span>
-        <span className={STR}>'[Tool]'</span>
-        <span className={MUT}>, </span>
-        <span className={STR}>'[Tool]'</span>
-        <span className={MUT}>],</span>
-      </span>,
-      <span key={`c-${i}`}>
-        {"  "}
-        <span className={MUT}>{i === arr.length - 1 ? "}" : "},"}</span>
-      </span>,
-    ]),
-    <span key="end">
-      <span className={MUT}>];</span>
-    </span>,
-  ],
-
-  work: [
-    <span key="0" className={COM}>
-      // TODO: add real projects
-    </span>,
-    <span key="1">
-      <span className={KW}>export const</span> <span className={PARAM}>work</span>{" "}
-      <span className={MUT}>= [</span>
-    </span>,
-    ...[0, 1, 2].flatMap((i, _, arr) => [
-      <span key={`o-${i}`}>
-        {"  "}
-        <span className={MUT}>{"{"}</span>
-      </span>,
-      <span key={`n-${i}`}>
+        <span className={KW}>return</span> <span className={MUT}>{"{"}</span>
+      </span>
+    ),
+    L(
+      <span>
         {"    "}
         <span className={PARAM}>name</span>
         <span className={MUT}>: </span>
-        <span className={STR}>'[Project name]'</span>
+        <span className={STR}>'[Your Name]'</span>
         <span className={MUT}>,</span>
-      </span>,
-      <span key={`tag-${i}`}>
+      </span>
+    ),
+    L(
+      <span>
         {"    "}
-        <span className={PARAM}>tag</span>
+        <span className={PARAM}>tagline</span>
         <span className={MUT}>: </span>
-        <span className={STR}>'[Type]'</span>
+        <span className={STR}>'[Add your one-line tagline here]'</span>
         <span className={MUT}>,</span>
-      </span>,
-      <span key={`d-${i}`}>
+      </span>
+    ),
+    L(
+      <span>
         {"    "}
-        <span className={PARAM}>desc</span>
+        <span className={PARAM}>status</span>
         <span className={MUT}>: </span>
-        <span className={STR}>'[One-line description]'</span>
+        <span className={STR}>'[Add your availability status]'</span>
         <span className={MUT}>,</span>
-      </span>,
-      <span key={`c-${i}`}>
+      </span>
+    ),
+    L(
+      <span>
         {"  "}
-        <span className={MUT}>{i === arr.length - 1 ? "}" : "},"}</span>
+        <span className={MUT}>{"};"}</span>
+      </span>
+    ),
+    L(<span className={MUT}>{"}"}</span>),
+  ],
+
+  about: [
+    L(<span className={COM}>// TODO: write this</span>),
+    L(
+      <span>
+        <span className={KW}>export const</span> <span className={PARAM}>about</span>{" "}
+        <span className={MUT}>= {"{"}</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>roles</span>
+        <span className={MUT}>: [</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={STR}>'Full-Stack Developer'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={STR}>'App Developer'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={STR}>'Electrical Design'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={MUT}>],</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>bio</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>`[Write a short bio here — what you build,</span>
+      </span>
+    ),
+    L(
+      <span>
+        <span className={STR}>{"    how you think, what you're into.]`"}</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(<span className={MUT}>{"};"}</span>),
+  ],
+
+  // ---- SKILLS.md — real markdown source, with a genuine working snippet ----
+  skills: [
+    L(
+      <span>
+        <span className={MUT}># </span>
+        <span className={HEADER}>Skills</span>
+      </span>
+    ),
+    L(""),
+    L(
+      <span className="text-[#a9b7c6]">
+        Pin-mapped by discipline. Swap the placeholders below for what you
+        actually use.
+      </span>
+    ),
+    L(""),
+    L(
+      <span>
+        <span className={MUT}>## </span>
+        <span className={HEADER}>01 · Software</span>
+      </span>
+    ),
+    L(
+      <span>
+        <Code>[Tool]</Code> <Code>[Tool]</Code> <Code>[Tool]</Code>
+      </span>
+    ),
+    L(""),
+    L(
+      <span>
+        <span className={MUT}>## </span>
+        <span className={HEADER}>02 · Applications</span>
+      </span>
+    ),
+    L(
+      <span>
+        <Code>[Tool]</Code> <Code>[Tool]</Code>
+      </span>
+    ),
+    L(""),
+    L(
+      <span>
+        <span className={MUT}>## </span>
+        <span className={HEADER}>03 · Electrical Design</span>
+      </span>
+    ),
+    L(
+      <span>
+        <Code>[Tool]</Code> <Code>[Tool]</Code>
+      </span>
+    ),
+    L(""),
+    L(
+      <span className="text-[#a9b7c6]">
+        A quick taste of how I actually write code, not just a buzzword list:
+      </span>
+    ),
+    L(""),
+    L(<span className="text-[#5a5d63]">```ts</span>, true),
+    L(<span className={COM}>{"// debounce any callback — I reach for this constantly"}</span>, true),
+    L(
+      <span>
+        <span className={KW}>export function</span> <span className={FN}>debounce</span>
+        <span className={MUT}>{"<T extends (...args: any[]) => void>("}</span>
       </span>,
-    ]),
-    <span key="end">
-      <span className={MUT}>];</span>
-    </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>fn</span>
+        <span className={MUT}>: </span>
+        <span className={TYPE}>T</span>
+        <span className={MUT}>,</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>delay</span>
+        <span className={MUT}> = </span>
+        <span className="text-[#6897bb]">300</span>
+      </span>,
+      true
+    ),
+    L(<span className={MUT}>{") {"}</span>, true),
+    L(
+      <span>
+        {"  "}
+        <span className={KW}>let</span> <span className={PARAM}>timer</span>
+        <span className={MUT}>: </span>
+        <span className={TYPE}>ReturnType</span>
+        <span className={MUT}>{"<typeof setTimeout>;"}</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={KW}>return</span> <span className={MUT}>{"(...args: Parameters<T>) => {"}</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={FN}>clearTimeout</span>
+        <span className={MUT}>(timer);</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={PARAM}>timer</span> <span className={MUT}>= </span>
+        <span className={FN}>setTimeout</span>
+        <span className={MUT}>{"(() => fn(...args), delay);"}</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={MUT}>{"};"}</span>
+      </span>,
+      true
+    ),
+    L(<span className={MUT}>{"}"}</span>, true),
+    L(<span className="text-[#5a5d63]">```</span>, true),
+  ],
+
+  // ---- WORK.md — real markdown source, with a genuine working snippet ----
+  work: [
+    L(
+      <span>
+        <span className={MUT}># </span>
+        <span className={HEADER}>Selected Work</span>
+      </span>
+    ),
+    L(""),
+    L(
+      <span className={COM}>
+        {"> [Add 2–3 real projects here — case studies, not just links.]"}
+      </span>
+    ),
+    L(""),
+    L(
+      <span>
+        <span className={MUT}>## </span>
+        <span className={HEADER}>[Project name]</span>
+      </span>
+    ),
+    L(
+      <span>
+        <Code>[Type]</Code> <span className="text-[#a9b7c6]">— [one-line description]</span>
+      </span>
+    ),
+    L(""),
+    L(<span className="text-[#5a5d63]">```tsx</span>, true),
+    L(<span className={COM}>{"// example: the core hook behind [Project name]"}</span>, true),
+    L(
+      <span>
+        <span className={KW}>function</span> <span className={FN}>useLiveData</span>
+        <span className={MUT}>(</span>
+        <span className={PARAM}>url</span>
+        <span className={MUT}>: </span>
+        <span className={TYPE}>string</span>
+        <span className={MUT}>) {"{"}</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={KW}>const</span> <span className={MUT}>[</span>
+        <span className={PARAM}>data</span>
+        <span className={MUT}>, </span>
+        <span className={PARAM}>setData</span>
+        <span className={MUT}>] = </span>
+        <span className={FN}>useState</span>
+        <span className={MUT}>(</span>
+        <span className={KW}>null</span>
+        <span className={MUT}>);</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={FN}>useEffect</span>
+        <span className={MUT}>(() {"=> {"}</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={KW}>const</span> <span className={PARAM}>es</span>
+        <span className={MUT}> = </span>
+        <span className={KW}>new</span> <span className={TYPE}>EventSource</span>
+        <span className={MUT}>(url);</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={PARAM}>es</span>
+        <span className={MUT}>.onmessage = </span>
+        <span className={MUT}>(</span>
+        <span className={PARAM}>e</span>
+        <span className={MUT}>) {"=> "}</span>
+        <span className={FN}>setData</span>
+        <span className={MUT}>(</span>
+        <span className={TYPE}>JSON</span>
+        <span className={MUT}>.</span>
+        <span className={FN}>parse</span>
+        <span className={MUT}>(e.data));</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={KW}>return</span> <span className={MUT}>() {"=> "}</span>
+        <span className={PARAM}>es</span>
+        <span className={MUT}>.</span>
+        <span className={FN}>close</span>
+        <span className={MUT}>();</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={MUT}>{"}, [url]);"}</span>
+      </span>,
+      true
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={KW}>return</span> <span className={PARAM}>data</span>
+        <span className={MUT}>;</span>
+      </span>,
+      true
+    ),
+    L(<span className={MUT}>{"}"}</span>, true),
+    L(<span className="text-[#5a5d63]">```</span>, true),
+    L(""),
+    L(
+      <span>
+        <span className={MUT}>## </span>
+        <span className={HEADER}>[Project name]</span>
+      </span>
+    ),
+    L(
+      <span>
+        <Code>[Type]</Code> <span className="text-[#a9b7c6]">— [one-line description]</span>
+      </span>
+    ),
+    L(""),
+    L(
+      <span>
+        <span className={MUT}>## </span>
+        <span className={HEADER}>[Project name]</span>
+      </span>
+    ),
+    L(
+      <span>
+        <Code>[Type]</Code> <span className="text-[#a9b7c6]">— [one-line description]</span>
+      </span>
+    ),
   ],
 
   contact: [
-    <span key="0">
-      <span className={KW}>export const</span> <span className={PARAM}>contact</span>{" "}
-      <span className={MUT}>= {"{"}</span>
-    </span>,
-    <span key="1">
-      {"  "}
-      <span className={PARAM}>email</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'[you@example.com]'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="2">
-      {"  "}
-      <span className={PARAM}>github</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'https://github.com/ivanisgoodatcoding52'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="3">
-      {"  "}
-      <span className={PARAM}>twitter</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'https://x.com/unnameduserplus'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="4">
-      {"  "}
-      <span className={PARAM}>youtube</span>
-      <span className={MUT}>: </span>
-      <span className={STR}>'https://www.youtube.com/@rgcodesarray'</span>
-      <span className={MUT}>,</span>
-    </span>,
-    <span key="5">
-      <span className={MUT}>{"};"}</span>
-    </span>,
+    L(
+      <span>
+        <span className={KW}>export const</span> <span className={PARAM}>contact</span>{" "}
+        <span className={MUT}>= {"{"}</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>email</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'[you@example.com]'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>github</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'https://github.com/ivanisgoodatcoding52'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>twitter</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'https://x.com/unnameduserplus'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>youtube</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'https://www.youtube.com/@rgcodesarray'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(<span className={MUT}>{"};"}</span>),
   ],
 };
 
@@ -259,7 +504,7 @@ function Preview({ id }: { id: FileId }) {
     case "home":
       return (
         <div className="flex h-full flex-col items-center justify-center gap-3 bg-[#141416] p-6 text-center">
-          <p className="font-mono text-2xl font-black tracking-tighter text-white">//array//</p>
+          <p className="text-lg font-black tracking-tight text-white">[Your Name]</p>
           <p className="max-w-[14rem] text-xs text-[#9aa0a6]">
             [Add your one-line tagline here]
           </p>
@@ -288,7 +533,7 @@ function Preview({ id }: { id: FileId }) {
         <div className="flex h-full flex-col justify-center gap-3 bg-[#141416] p-6">
           {["01", "02", "03"].map((pin) => (
             <div key={pin} className="rounded-lg border border-[#393b40] p-3">
-              <p className="mb-1 font-mono text-[10px] text-[#67d6ef]">PIN {pin}</p>
+              <p className="mb-1 text-[10px] text-[#67d6ef]">PIN {pin}</p>
               <p className="mb-1 text-xs font-bold text-white">[Category]</p>
               <div className="flex gap-1.5">
                 {chip("[Tool]")}
@@ -303,7 +548,7 @@ function Preview({ id }: { id: FileId }) {
         <div className="flex h-full flex-col justify-center gap-3 bg-[#141416] p-6">
           {[0, 1, 2].map((i) => (
             <div key={i} className="rounded-lg border border-[#393b40] p-3">
-              <p className="mb-1 font-mono text-[10px] text-[#67d6ef]">[Type]</p>
+              <p className="mb-1 text-[10px] text-[#67d6ef]">[Type]</p>
               <p className="mb-1 text-xs font-bold text-white">[Project name]</p>
               <p className="text-[11px] text-[#9aa0a6]">[One-line description]</p>
             </div>
@@ -329,20 +574,24 @@ function Preview({ id }: { id: FileId }) {
 /* Small pieces                                                            */
 /* ---------------------------------------------------------------------- */
 
-function Line({ n, children }: { n: number; children: React.ReactNode }) {
+function Line({ n, data }: { n: number; data: LineData }) {
   return (
-    <div className="flex px-3 leading-6 hover:bg-white/[0.03]">
+    <div
+      className={`flex px-3 leading-6 ${
+        data.block ? "bg-[#1a1b1d]" : "hover:bg-white/[0.03]"
+      }`}
+    >
       <span className="w-8 shrink-0 select-none pr-4 text-right text-[#5a5d63]">{n}</span>
-      <span className="whitespace-pre-wrap break-words">{children}</span>
+      <span className="whitespace-pre-wrap break-words">{data.text}</span>
     </div>
   );
 }
 
-const CHIPS: { label: string; sub: string; target: FileId }[] = [
-  { label: "About me", sub: "[who you are, in a sentence]", target: "about" },
-  { label: "My skills", sub: "[the tools you reach for]", target: "skills" },
-  { label: "Selected work", sub: "[projects worth showing]", target: "work" },
-  { label: "Get in touch", sub: "[the fastest way to reach you]", target: "contact" },
+const BOOKMARKS: { key: string; sub: string; target: FileId }[] = [
+  { key: "F1", sub: "[who you are, in a sentence]", target: "about" },
+  { key: "F2", sub: "[the tools you reach for]", target: "skills" },
+  { key: "F3", sub: "[projects worth showing]", target: "work" },
+  { key: "F4", sub: "[the fastest way to reach you]", target: "contact" },
 ];
 
 /* ---------------------------------------------------------------------- */
@@ -360,7 +609,7 @@ export default function Home() {
   ]);
   const [treeOpen, setTreeOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(true);
-  const [assistantOpen, setAssistantOpen] = useState(true);
+  const [bookmarksOpen, setBookmarksOpen] = useState(true);
 
   const openFile = (id: FileId) => {
     setOpenTabs((prev) => (prev.includes(id) ? prev : [...prev, id]));
@@ -387,7 +636,10 @@ export default function Home() {
   );
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-[#1e1f22] font-mono text-[13px] text-[#a9b7c6]">
+    <main
+      className={`${jetbrainsMono.variable} ${roboto.variable} flex h-screen flex-col overflow-hidden bg-[#1e1f22] text-[13px] text-[#a9b7c6]`}
+      style={{ fontFamily: "var(--font-mono)" }}
+    >
       {/* toolbar */}
       <div className="flex shrink-0 items-center gap-4 border-b border-[#393b40] bg-[#2b2d30] px-3 py-1.5">
         <button
@@ -398,7 +650,7 @@ export default function Home() {
           ☰
         </button>
         <span className="flex items-center gap-1.5 text-xs text-[#e2e4e9]">
-          🤖 <span className="font-semibold">array</span> ▾
+          {"</>"} <span className="font-semibold">portfolio</span> ▾
         </span>
         <span className="hidden items-center gap-1.5 text-xs text-[#9aa0a6] sm:flex">
           🌿 main ▾
@@ -416,10 +668,10 @@ export default function Home() {
             ▥ Preview
           </button>
           <button
-            onClick={() => setAssistantOpen((v) => !v)}
+            onClick={() => setBookmarksOpen((v) => !v)}
             className="rounded px-2 py-0.5 text-[11px] text-[#9aa0a6] hover:bg-white/10"
           >
-            ✦ Assistant
+            🔖 Bookmarks
           </button>
           <span className="h-6 w-6 rounded-full bg-[#57965c]" />
         </div>
@@ -445,7 +697,7 @@ export default function Home() {
             />
             <div className="absolute left-11 top-0 z-30 h-full w-56 border-r border-[#393b40] bg-[#1e1f22] p-2">
               <p className="mb-1 px-1 text-[11px] uppercase tracking-wide text-[#6f737a]">
-                array-portfolio
+                portfolio
               </p>
               {(Object.keys(FILE_META) as FileId[]).map((id) => (
                 <button
@@ -495,19 +747,20 @@ export default function Home() {
           </div>
 
           <div className="flex-1 overflow-auto py-3">
-            {CODE[activeTab].map((line, i) => (
-              <Line key={i} n={i + 1}>
-                {line}
-              </Line>
+            {CODE[activeTab].map((data, i) => (
+              <Line key={i} n={i + 1} data={data} />
             ))}
           </div>
         </div>
 
         {/* preview column */}
         {previewOpen && (
-          <div className="hidden w-64 shrink-0 flex-col border-l border-[#393b40] bg-[#232426] lg:flex">
+          <div
+            className="hidden w-64 shrink-0 flex-col border-l border-[#393b40] bg-[#232426] lg:flex"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
             <div className="flex items-center justify-between border-b border-[#393b40] px-3 py-2 text-[11px] text-[#9aa0a6]">
-              <span>{FILE_META[activeTab].label.replace(".tsx", "Preview")}</span>
+              <span>{FILE_META[activeTab].label.replace(/\.(tsx|md)/, "Preview")}</span>
               <span className="text-[#57965c]">✓ Up-to-date</span>
             </div>
             <div className="flex-1 overflow-auto p-3">
@@ -518,47 +771,39 @@ export default function Home() {
           </div>
         )}
 
-        {/* assistant panel */}
-        {assistantOpen && (
-          <div className="absolute right-0 z-10 flex h-full w-full flex-col border-l border-[#393b40] bg-[#1e1f22] sm:w-80 md:static md:w-80">
-            <div className="flex items-center gap-4 border-b border-[#393b40] px-4 py-2 text-xs">
-              <span className="border-b-2 border-[#3574f0] pb-1.5 font-semibold text-white">
-                Guide
-              </span>
-              <span className="pb-1.5 text-[#9aa0a6]">Chat</span>
+        {/* bookmarks panel — a real IDE tool window, not a chat assistant */}
+        {bookmarksOpen && (
+          <div
+            className="absolute right-0 z-10 flex h-full w-full flex-col border-l border-[#393b40] bg-[#1e1f22] sm:w-72 md:static md:w-72"
+            style={{ fontFamily: "var(--font-sans)" }}
+          >
+            <div className="flex items-center border-b border-[#393b40] px-4 py-2 text-xs">
+              <span className="font-semibold text-white">Bookmarks</span>
               <button
-                onClick={() => setAssistantOpen(false)}
+                onClick={() => setBookmarksOpen(false)}
                 className="ml-auto text-[#9aa0a6] hover:text-white md:hidden"
               >
                 ×
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-5">
-              <p className="bg-gradient-to-r from-[#3574f0] to-[#8a7ffb] bg-clip-text text-2xl font-bold leading-tight text-transparent">
-                Hey, welcome.
-              </p>
-              <p className="mt-2 text-sm text-[#9aa0a6]">What do you want to see?</p>
-              <div className="mt-5 grid grid-cols-1 gap-2.5">
-                {CHIPS.map((c) => (
-                  <button
-                    key={c.target}
-                    onClick={() => openFile(c.target)}
-                    className="rounded-lg border border-[#5c4dd6]/50 bg-[#2b2d30] px-3 py-2.5 text-left hover:border-[#8a7ffb] hover:bg-[#2f3236]"
-                  >
-                    <p className="text-xs font-semibold text-[#c9c2ff]">{c.label}</p>
-                    <p className="mt-0.5 text-[11px] text-[#8a8f96]">{c.sub}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="shrink-0 border-t border-[#393b40] p-3">
-              <div className="rounded-lg border border-[#393b40] bg-[#2b2d30] px-3 py-2 text-[11px] text-[#6f737a]">
-                Ask about this portfolio…
-              </div>
-              <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#6f737a]">
-                <span>array v1.0</span>
-                <span>▷</span>
-              </div>
+            <div className="flex-1 overflow-auto p-2">
+              {BOOKMARKS.map((b) => (
+                <button
+                  key={b.target}
+                  onClick={() => openFile(b.target)}
+                  className="flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-white/5"
+                >
+                  <span className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-[#393b40] bg-[#2b2d30] text-[10px] font-semibold text-[#9aa0a6]">
+                    {b.key}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-medium text-[#e2e4e9]">
+                      {FILE_META[b.target].label}
+                    </span>
+                    <span className="block truncate text-[11px] text-[#8a8f96]">{b.sub}</span>
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -566,7 +811,7 @@ export default function Home() {
 
       {/* status bar */}
       <div className="flex shrink-0 items-center gap-1.5 border-t border-[#393b40] bg-[#2b2d30] px-3 py-1 text-[11px] text-[#9aa0a6]">
-        <span>array-portfolio</span>
+        <span>portfolio</span>
         <span>›</span>
         <span>src</span>
         <span>›</span>
