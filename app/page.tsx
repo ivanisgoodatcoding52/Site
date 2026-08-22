@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import { JetBrains_Mono, Roboto } from "next/font/google";
+import Image from "next/image";
 
 /* ---------------------------------------------------------------------- */
 /* Fonts                                                                    */
@@ -22,8 +21,7 @@ const roboto = Roboto({
 });
 
 /* ---------------------------------------------------------------------- */
-/* Icons — real Google Material Icons (not emoji). Next.js hoists this     */
-/* <link> into <head> automatically wherever it renders.                   */
+/* Icons — real Google Material Icons (not emoji)                          */
 /* ---------------------------------------------------------------------- */
 
 function MaterialIconsFont() {
@@ -63,229 +61,408 @@ const focusRing =
 /* Darcula-ish syntax colors                                               */
 /* ---------------------------------------------------------------------- */
 
-const MUT = "text-[#a9b7c6]";
+const KW = "text-[#cf8e6d]";
+const FN = "text-[#57965c]";
+const TYPE = "text-[#5794d1]";
+const PARAM = "text-[#67d6ef]";
+const STR = "text-[#a5c261]";
 const COM = "text-[#7a7e85] italic";
+const MUT = "text-[#a9b7c6]";
 const HEADER = "text-[#5794d1] font-bold";
-const LINK = "text-[#67d6ef]";
-const URL = "text-[#a5c261]";
-const INLINE = "rounded bg-[#2b2d30] px-1";
+const INLINE = "rounded bg-[#2b2d30] px-1 text-[#e2b273]";
 
-function Code({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return <span className={`${INLINE} ${className ?? "text-[#e2b273]"}`}>{children}</span>;
+function Code({ children }: { children: React.ReactNode }) {
+  return <span className={INLINE}>{children}</span>;
 }
 
-type ProjectId = "launcherx" | "infiniality" | "deluge" | "obscureyt" | "compressd";
+type FileId = "home" | "about" | "skills" | "work" | "contact";
 
-const PROJECTS: Record<
-  ProjectId,
-  {
-    file: string;
-    title: string;
-    tag: string;
-    accent: string;
-    description: string[];
-    note?: string;
-    links?: { label: string; href: string }[];
-    /** Set this to a real file in /public (e.g. "/projects/launcherx.png") once you have one. */
-    image?: string;
-    imageAlt?: string;
-  }
-> = {
-  launcherx: {
-    file: "LauncherX.md",
-    title: "LauncherX",
-    tag: "Roblox / Client",
-    accent: "text-[#4ade80]",
-    description: [
-      "LauncherX is a fork of a Roblox Revival called Project Mega. It basically turns all of the clients into one launcher that you can use to play any version you want!",
-      "I'll also have a way to configure the clients to run on localhost, basically turning Roblox into a singleplayer client.",
-    ],
-  },
-  infiniality: {
-    file: "Infiniality.md",
-    title: "Infiniality",
-    tag: "Unity / Game",
-    accent: "text-[#818cf8]",
-    description: [
-      "You wake up one day to the jingle of a large department store. This is SCP-3008-1, and as soon as you realize this, you have no escape from this store. How long can you survive?",
-    ],
-    note: "Made in Unity 2022.3",
-  },
-  deluge: {
-    file: "Deluge.md",
-    title: "Deluge",
-    tag: "Unity / Game",
-    accent: "text-[#818cf8]",
-    description: [
-      'Deluge is a platformer game mostly inspired by the Roblox game "Flood Escape 2". You escape floods made out of different fluids, push buttons, and survive.',
-    ],
-    note: "Made in Unity 2022.3",
-  },
-  obscureyt: {
-    file: "ObscureYT.md",
-    title: "ObscureYT",
-    tag: "Web / API",
-    accent: "text-[#22d3ee]",
-    description: [
-      "A website that is dedicated to finding old youtube videos! There is even a Tags section so that you can specify which videos you want to see! We also made another one that pulls Roblox Videos as well.",
-    ],
-    links: [
-      { label: "RobloxYT", href: "https://github.io" },
-      { label: "ObscureYT", href: "https://github.io" },
-    ],
-  },
-  compressd: {
-    file: "Compressd.md",
-    title: "Compress'd",
-    tag: "Tool / Video",
-    accent: "text-[#fbbf24]",
-    description: ["A video compressor for discord! Check it out:"],
-    links: [{ label: "Video Bypasser", href: "https://github.io" }],
-  },
+const FILE_META: Record<FileId, { label: string; ext: string }> = {
+  home: { label: "Home.tsx", ext: "TSX" },
+  about: { label: "About.tsx", ext: "TSX" },
+  skills: { label: "SKILLS.md", ext: "MD" },
+  work: { label: "WORK.md", ext: "MD" },
+  contact: { label: "Contact.tsx", ext: "TSX" },
 };
 
-const ORDER: ProjectId[] = ["launcherx", "infiniality", "deluge", "obscureyt", "compressd"];
+/** Set this to a real file in /public (e.g. "/profile.jpg") once you have one. */
+const PROFILE_IMAGE: { src: string; alt: string } | null = null;
 
 /* ---------------------------------------------------------------------- */
-/* Line data — rendered as real markdown source                            */
+/* Line data                                                                */
 /* ---------------------------------------------------------------------- */
 
-type LineData = { text: React.ReactNode };
-const L = (text: React.ReactNode): LineData => ({ text });
+type LineData = { text: React.ReactNode; block?: boolean };
+const L = (text: React.ReactNode, block = false): LineData => ({ text, block });
 
-function buildLines(id: ProjectId, p: (typeof PROJECTS)[ProjectId]): LineData[] {
-  const lines: LineData[] = [
+const CODE: Record<FileId, LineData[]> = {
+  home: [
     L(
       <span>
-        <span className={MUT}># </span>
-        <span className={HEADER}>{p.title}</span>
+        <span className={KW}>export default function</span> <span className={FN}>Hero</span>
+        <span className={MUT}>() {"{"}</span>
       </span>
     ),
-    L(""),
-    L(<Code className={p.accent}>{p.tag}</Code>),
-    L(""),
     L(
       <span>
-        <span className={MUT}>![</span>
-        <span className={LINK}>{p.imageAlt ?? `${p.title} screenshot`}</span>
-        <span className={MUT}>](</span>
-        <span className={URL}>{p.image ?? `[/public/projects/${id}.png]`}</span>
-        <span className={MUT}>)</span>
+        {"  "}
+        <span className={KW}>return</span> <span className={MUT}>{"{"}</span>
       </span>
     ),
-  ];
+    L(
+      <span>
+        {"    "}
+        <span className={PARAM}>name</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'[Your Name]'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={PARAM}>tagline</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'[Add your one-line tagline here]'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={PARAM}>photo</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'{PROFILE_IMAGE?.src ?? "[/public/profile.jpg]"}'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={PARAM}>status</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'[Add your availability status]'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={MUT}>{"};"}</span>
+      </span>
+    ),
+    L(<span className={MUT}>{"}"}</span>),
+  ],
 
-  p.description.forEach((para, i) => {
-    lines.push(L(""));
-    lines.push(L(<span className="text-[#c7ccd1]">{para}</span>));
-  });
+  about: [
+    L(<span className={COM}>// TODO: write this</span>),
+    L(
+      <span>
+        <span className={KW}>export const</span> <span className={PARAM}>about</span>{" "}
+        <span className={MUT}>= {"{"}</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>roles</span>
+        <span className={MUT}>: [</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={STR}>'Full-Stack Developer'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={STR}>'App Developer'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"    "}
+        <span className={STR}>'Electrical Design'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={MUT}>],</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>bio</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>`[Write a short bio here — what you build,</span>
+      </span>
+    ),
+    L(
+      <span>
+        <span className={STR}>{"    how you think, what you're into.]`"}</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(<span className={MUT}>{"};"}</span>),
+  ],
 
-  if (p.note) {
-    lines.push(L(""));
-    lines.push(L(<span className={COM}>// {p.note}</span>));
-  }
-
-  if (p.links && p.links.length) {
-    lines.push(L(""));
-    lines.push(
+  skills: [
+    L(<span className={COM}>{"// pinout — what I build"}</span>),
+    L(
+      <span>
+        <span className={KW}>export const</span> <span className={PARAM}>skills</span>{" "}
+        <span className={MUT}>= [</span>
+      </span>
+    ),
+    ...["01", "02", "03"].flatMap((pin, i, arr) => [
       L(
         <span>
-          <span className={MUT}>## </span>
-          <span className={HEADER}>Links</span>
+          {"  "}
+          <span className={MUT}>{"{"}</span>
         </span>
-      )
-    );
-    p.links.forEach((link) => {
-      lines.push(
-        L(
-          <span>
-            <span className={MUT}>- </span>
-            <a
-              href={link.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`rounded ${focusRing} hover:underline`}
-            >
-              <span className={MUT}>[</span>
-              <span className={LINK}>{link.label}</span>
-              <span className={MUT}>](</span>
-              <span className={URL}>{link.href}</span>
-              <span className={MUT}>)</span>
-            </a>
-          </span>
-        )
+      ),
+      L(
+        <span>
+          {"    "}
+          <span className={PARAM}>pin</span>
+          <span className={MUT}>: </span>
+          <span className={STR}>'{pin}'</span>
+          <span className={MUT}>,</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"    "}
+          <span className={PARAM}>title</span>
+          <span className={MUT}>: </span>
+          <span className={STR}>'[Category]'</span>
+          <span className={MUT}>,</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"    "}
+          <span className={PARAM}>tools</span>
+          <span className={MUT}>: [</span>
+          <span className={STR}>'[Tool]'</span>
+          <span className={MUT}>, </span>
+          <span className={STR}>'[Tool]'</span>
+          <span className={MUT}>],</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"  "}
+          <span className={MUT}>{i === arr.length - 1 ? "}" : "},"}</span>
+        </span>
+      ),
+    ]),
+    L(<span className={MUT}>];</span>),
+  ],
+
+  work: [
+    L(<span className={COM}>{"// TODO: add real projects — see /projects"}</span>),
+    L(
+      <span>
+        <span className={KW}>export const</span> <span className={PARAM}>work</span>{" "}
+        <span className={MUT}>= [</span>
+      </span>
+    ),
+    ...[0, 1, 2].flatMap((i, _, arr) => [
+      L(
+        <span>
+          {"  "}
+          <span className={MUT}>{"{"}</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"    "}
+          <span className={PARAM}>name</span>
+          <span className={MUT}>: </span>
+          <span className={STR}>'[Project name]'</span>
+          <span className={MUT}>,</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"    "}
+          <span className={PARAM}>tag</span>
+          <span className={MUT}>: </span>
+          <span className={STR}>'[Type]'</span>
+          <span className={MUT}>,</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"    "}
+          <span className={PARAM}>desc</span>
+          <span className={MUT}>: </span>
+          <span className={STR}>'[One-line description]'</span>
+          <span className={MUT}>,</span>
+        </span>
+      ),
+      L(
+        <span>
+          {"  "}
+          <span className={MUT}>{i === arr.length - 1 ? "}" : "},"}</span>
+        </span>
+      ),
+    ]),
+    L(<span className={MUT}>];</span>),
+  ],
+
+  contact: [
+    L(
+      <span>
+        <span className={KW}>export const</span> <span className={PARAM}>contact</span>{" "}
+        <span className={MUT}>= {"{"}</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>email</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'[you@example.com]'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>github</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'https://github.com/ivanisgoodatcoding52'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>twitter</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'https://x.com/unnameduserplus'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(
+      <span>
+        {"  "}
+        <span className={PARAM}>youtube</span>
+        <span className={MUT}>: </span>
+        <span className={STR}>'https://www.youtube.com/@rgcodesarray'</span>
+        <span className={MUT}>,</span>
+      </span>
+    ),
+    L(<span className={MUT}>{"};"}</span>),
+  ],
+};
+
+/* ---------------------------------------------------------------------- */
+/* Preview column                                                           */
+/* ---------------------------------------------------------------------- */
+
+function Preview({ id }: { id: FileId }) {
+  const chip = (text: string) => (
+    <span className="rounded-full border border-[#393b40] bg-[#2b2d30] px-2.5 py-1 text-[10px] text-[#a9b7c6]">
+      {text}
+    </span>
+  );
+
+  switch (id) {
+    case "home":
+      return (
+        <div className="flex h-full flex-col bg-[#141416]">
+          {PROFILE_IMAGE ? (
+            <div className="relative aspect-square w-full overflow-hidden bg-[#0d0d0e]">
+              <Image
+                src={PROFILE_IMAGE.src}
+                alt={PROFILE_IMAGE.alt}
+                fill
+                sizes="256px"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 border-b border-[#393b40] bg-[#0d0d0e] text-[#5a5d63]">
+              <Icon name="add_a_photo" size={22} />
+              <span className="px-2 text-center text-[10px]">[Add /public/profile.jpg]</span>
+            </div>
+          )}
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+            <p className="text-lg font-black tracking-tight text-white">[Your Name]</p>
+            <p className="max-w-[14rem] text-xs text-[#9aa0a6]">
+              [Add your one-line tagline here]
+            </p>
+            {chip("[availability status]")}
+            <span className="mt-2 rounded-full bg-[#57965c] px-5 py-1.5 text-[11px] font-bold text-[#141416]">
+              Let&apos;s go
+            </span>
+          </div>
+        </div>
       );
-    });
-  }
-
-  return lines;
-}
-
-const CODE: Record<ProjectId, LineData[]> = ORDER.reduce(
-  (acc, id) => ({ ...acc, [id]: buildLines(id, PROJECTS[id]) }),
-  {} as Record<ProjectId, LineData[]>
-);
-
-/* ---------------------------------------------------------------------- */
-/* Preview column — includes real image support, with a clear placeholder  */
-/* when a project doesn't have a screenshot yet.                           */
-/* ---------------------------------------------------------------------- */
-
-function Preview({ id }: { id: ProjectId }) {
-  const p = PROJECTS[id];
-  return (
-    <div className="flex h-full flex-col bg-[#141416]">
-      {p.image ? (
-        <div className="relative aspect-video w-full overflow-hidden bg-[#0d0d0e]">
-          <Image
-            src={p.image}
-            alt={p.imageAlt ?? `Screenshot of ${p.title}`}
-            fill
-            sizes="256px"
-            className="object-cover"
-          />
-        </div>
-      ) : (
-        <div className="flex aspect-video w-full flex-col items-center justify-center gap-1 border-b border-[#393b40] bg-[#0d0d0e] text-[#5a5d63]">
-          <Icon name="add_photo_alternate" size={22} />
-          <span className="px-2 text-center text-[10px]">
-            [Add /public/projects/{id}.png]
-          </span>
-        </div>
-      )}
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <span
-          className={`self-start rounded-full border border-[#393b40] bg-[#2b2d30] px-2.5 py-1 text-[10px] ${p.accent}`}
-        >
-          {p.tag}
-        </span>
-        <p className="text-base font-bold text-white">{p.title}</p>
-        <p className="text-xs leading-relaxed text-[#9aa0a6]">{p.description[0]}</p>
-        {p.links && (
-          <div className="mt-1 flex flex-wrap gap-1.5">
-            {p.links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`flex items-center gap-1 rounded-lg border border-[#393b40] bg-[#2b2d30] px-2.5 py-1 text-[10px] text-[#e2e4e9] hover:border-[#67d6ef] ${focusRing}`}
-              >
-                {link.label}
-                <Icon name="open_in_new" size={12} />
-              </a>
+    case "about":
+      return (
+        <div className="flex h-full flex-col justify-center gap-4 bg-[#141416] p-6">
+          <div className="flex flex-wrap gap-1.5">
+            {["Full-Stack Developer", "App Developer", "Electrical Design"].map((r) => (
+              <span key={r}>{chip(r)}</span>
             ))}
           </div>
-        )}
-      </div>
-    </div>
-  );
+          <p className="text-xs leading-relaxed text-[#9aa0a6]">
+            [Write a short bio here — what you build, how you think, what
+            you&apos;re into.]
+          </p>
+        </div>
+      );
+    case "skills":
+      return (
+        <div className="flex h-full flex-col justify-center gap-3 bg-[#141416] p-6">
+          {["01", "02", "03"].map((pin) => (
+            <div key={pin} className="rounded-lg border border-[#393b40] p-3">
+              <p className="mb-1 text-[10px] text-[#67d6ef]">PIN {pin}</p>
+              <p className="mb-1 text-xs font-bold text-white">[Category]</p>
+              <div className="flex gap-1.5">
+                {chip("[Tool]")}
+                {chip("[Tool]")}
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    case "work":
+      return (
+        <div className="flex h-full flex-col justify-center gap-3 bg-[#141416] p-6">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-lg border border-[#393b40] p-3">
+              <p className="mb-1 text-[10px] text-[#67d6ef]">[Type]</p>
+              <p className="mb-1 text-xs font-bold text-white">[Project name]</p>
+              <p className="text-[11px] text-[#9aa0a6]">[One-line description]</p>
+            </div>
+          ))}
+        </div>
+      );
+    case "contact":
+      return (
+        <div className="flex h-full flex-col items-center justify-center gap-4 bg-[#141416] p-6 text-center">
+          <p className="text-sm font-bold text-white">Let&apos;s build something.</p>
+          <span className="text-xs text-[#67d6ef]">[you@example.com]</span>
+          <div className="flex gap-2">
+            {chip("GitHub")}
+            {chip("Twitter")}
+            {chip("YouTube")}
+          </div>
+        </div>
+      );
+  }
 }
 
 /* ---------------------------------------------------------------------- */
@@ -294,7 +471,11 @@ function Preview({ id }: { id: ProjectId }) {
 
 function Line({ n, data }: { n: number; data: LineData }) {
   return (
-    <div className="flex px-3 leading-6 hover:bg-white/[0.03]">
+    <div
+      className={`flex px-3 leading-6 ${
+        data.block ? "bg-[#1a1b1d]" : "hover:bg-white/[0.03]"
+      }`}
+    >
       <span className="w-8 shrink-0 select-none pr-4 text-right text-[#5a5d63]">{n}</span>
       <span className="whitespace-pre-wrap break-words">{data.text}</span>
     </div>
@@ -305,42 +486,47 @@ function Crumb() {
   return <Icon name="chevron_right" size={14} className="text-[#5a5d63]" />;
 }
 
-const SITE_LINKS = [
-  { icon: "home", label: "Home.tsx", href: "/" },
-  { icon: "translate", label: "Languages.tsx", href: "/languages" },
-  { icon: "article", label: "Blog.tsx", href: "/blog" },
-  { icon: "folder_open", label: "Files.tsx", href: "/files" },
+const BOOKMARKS: { sub: string; target: FileId }[] = [
+  { sub: "[who you are, in a sentence]", target: "about" },
+  { sub: "[the tools you reach for]", target: "skills" },
+  { sub: "[projects worth showing]", target: "work" },
+  { sub: "[the fastest way to reach you]", target: "contact" },
 ];
 
 /* ---------------------------------------------------------------------- */
 /* Page                                                                     */
 /* ---------------------------------------------------------------------- */
 
-export default function ProjectsPage() {
-  const [activeTab, setActiveTab] = useState<ProjectId>("launcherx");
-  const [openTabs, setOpenTabs] = useState<ProjectId[]>(ORDER);
+export default function Home() {
+  const [activeTab, setActiveTab] = useState<FileId>("home");
+  const [openTabs, setOpenTabs] = useState<FileId[]>([
+    "home",
+    "about",
+    "skills",
+    "work",
+    "contact",
+  ]);
   const [treeOpen, setTreeOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(true);
   const [bookmarksOpen, setBookmarksOpen] = useState(true);
 
   const tabRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const openFile = (id: ProjectId) => {
+  const openFile = (id: FileId) => {
     setOpenTabs((prev) => (prev.includes(id) ? prev : [...prev, id]));
     setActiveTab(id);
     setTreeOpen(false);
   };
 
-  const closeTab = (id: ProjectId, e: React.SyntheticEvent) => {
+  const closeTab = (id: FileId, e: React.SyntheticEvent) => {
     e.stopPropagation();
     setOpenTabs((prev) => {
       const next = prev.filter((t) => t !== id);
-      if (activeTab === id) setActiveTab(next.length ? next[next.length - 1] : ORDER[0]);
-      return next.length ? next : [ORDER[0]];
+      if (activeTab === id) setActiveTab(next.length ? next[next.length - 1] : "home");
+      return next.length ? next : ["home"];
     });
   };
 
-  // Roving-tabindex keyboard navigation for the tablist (Left/Right/Home/End).
   const handleTabKeyDown = (e: React.KeyboardEvent, index: number) => {
     let nextIndex: number | null = null;
     if (e.key === "ArrowRight") nextIndex = (index + 1) % openTabs.length;
@@ -398,7 +584,7 @@ export default function ProjectsPage() {
           <Icon name="arrow_drop_down" size={16} />
         </span>
         <span className="hidden items-center gap-1.5 text-xs text-[#9aa0a6] md:flex">
-          projects <Icon name="arrow_drop_down" size={16} />
+          site <Icon name="arrow_drop_down" size={16} />
         </span>
         <Icon name="play_arrow" size={18} className="text-[#57965c]" />
         <Icon name="bug_report" size={18} className="text-[#9aa0a6]" />
@@ -453,45 +639,40 @@ export default function ProjectsPage() {
               aria-modal="true"
               aria-label="Project files"
               onKeyDown={(e) => e.key === "Escape" && setTreeOpen(false)}
-              className="absolute left-11 top-0 z-30 h-full w-60 border-r border-[#393b40] bg-[#1e1f22] p-2"
+              className="absolute left-11 top-0 z-30 h-full w-56 border-r border-[#393b40] bg-[#1e1f22] p-2"
             >
               <p className="mb-1 px-1 text-[11px] uppercase tracking-wide text-[#6f737a]">
                 portfolio
               </p>
-              <Link
-                href="/"
-                className={`flex items-center gap-2 rounded px-2 py-1 text-xs text-[#cccccc] hover:bg-white/5 ${focusRing}`}
+              <p className="mb-1 px-1 text-xs font-bold text-white">▾ portfolio</p>
+              <button
+                onClick={() => openFile("home")}
+                className={`flex w-full items-center gap-2 rounded px-2 py-1 text-left text-xs ${focusRing} ${
+                  activeTab === "home" ? "bg-[#3a3d41] text-white" : "text-[#cccccc] hover:bg-white/5"
+                }`}
               >
                 <Icon name="description" size={16} className="text-[#57965c]" />
                 Home.tsx
-              </Link>
-              <p className="mt-1 flex items-center gap-1.5 px-2 py-1 text-xs font-semibold text-white">
-                <Icon name="folder_open" size={16} /> projects/
+              </button>
+              <p className="ml-2 mt-1 flex items-center gap-1.5 px-2 py-1 text-xs text-[#cccccc]">
+                <Icon name="folder_open" size={16} /> src
               </p>
-              {ORDER.map((id) => (
+              {(["about", "skills", "work", "contact"] as FileId[]).map((id) => (
                 <button
                   key={id}
                   onClick={() => openFile(id)}
-                  className={`ml-3 flex w-[calc(100%-0.75rem)] items-center gap-2 rounded px-2 py-1 text-left text-xs ${focusRing} ${
+                  className={`ml-5 flex w-[calc(100%-1.25rem)] items-center gap-2 rounded px-2 py-1 text-left text-xs ${focusRing} ${
                     activeTab === id ? "bg-[#3a3d41] text-white" : "text-[#cccccc] hover:bg-white/5"
                   }`}
                 >
-                  <Icon name="description" size={16} className="text-[#519aba]" />
-                  {PROJECTS[id].file}
+                  <Icon
+                    name="description"
+                    size={16}
+                    className={FILE_META[id].ext === "MD" ? "text-[#519aba]" : "text-[#57965c]"}
+                  />
+                  {FILE_META[id].label}
                 </button>
               ))}
-              <div className="mt-2 border-t border-[#393b40] pt-2">
-                {SITE_LINKS.slice(1).map((s) => (
-                  <Link
-                    key={s.href}
-                    href={s.href}
-                    className={`flex items-center gap-2 rounded px-2 py-1 text-xs text-[#cccccc] hover:bg-white/5 ${focusRing}`}
-                  >
-                    <Icon name="description" size={16} className="text-[#57965c]" />
-                    {s.label}
-                  </Link>
-                ))}
-              </div>
             </div>
           </>
         )}
@@ -522,11 +703,15 @@ export default function ProjectsPage() {
                     : "border-t-2 border-t-transparent text-[#9aa0a6] hover:bg-white/5"
                 }`}
               >
-                <Icon name="description" size={16} className="text-[#519aba]" />
-                {PROJECTS[id].file}
+                <Icon
+                  name="description"
+                  size={16}
+                  className={FILE_META[id].ext === "MD" ? "text-[#519aba]" : "text-[#57965c]"}
+                />
+                {FILE_META[id].label}
                 <button
                   type="button"
-                  aria-label={`Close ${PROJECTS[id].file}`}
+                  aria-label={`Close ${FILE_META[id].label}`}
                   onClick={(e) => closeTab(id, e)}
                   className={`ml-1 rounded p-0.5 text-[#9aa0a6] hover:bg-white/20 hover:text-white ${focusRing}`}
                 >
@@ -556,7 +741,7 @@ export default function ProjectsPage() {
             style={{ fontFamily: "var(--font-sans)" }}
           >
             <div className="flex items-center justify-between border-b border-[#393b40] px-3 py-2 text-[11px] text-[#9aa0a6]">
-              <span>{PROJECTS[activeTab].file.replace(".md", "Preview")}</span>
+              <span>{FILE_META[activeTab].label.replace(/\.(tsx|md)/, "Preview")}</span>
               <span className="flex items-center gap-1 text-[#57965c]">
                 <Icon name="check_circle" size={14} /> Up-to-date
               </span>
@@ -585,49 +770,25 @@ export default function ProjectsPage() {
                 <Icon name="close" size={16} />
               </button>
             </div>
-            <div className="flex-1 overflow-auto p-2">
-              <nav aria-label="Jump to project">
-                <p className="px-2 pb-1 pt-2 text-[10px] uppercase tracking-wide text-[#6f737a]">
-                  Projects
-                </p>
-                {ORDER.map((id, i) => (
-                  <button
-                    key={id}
-                    onClick={() => openFile(id)}
-                    className={`flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-white/5 ${focusRing}`}
-                  >
-                    <span className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-[#393b40] bg-[#2b2d30] text-[10px] font-semibold text-[#9aa0a6]">
-                      F{i + 1}
+            <nav aria-label="Jump to section" className="flex-1 overflow-auto p-2">
+              {BOOKMARKS.map((b, i) => (
+                <button
+                  key={b.target}
+                  onClick={() => openFile(b.target)}
+                  className={`flex w-full items-center gap-3 rounded-md px-2 py-2.5 text-left hover:bg-white/5 ${focusRing}`}
+                >
+                  <span className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-[#393b40] bg-[#2b2d30] text-[10px] font-semibold text-[#9aa0a6]">
+                    F{i + 1}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-xs font-medium text-[#e2e4e9]">
+                      {FILE_META[b.target].label}
                     </span>
-                    <span className="min-w-0">
-                      <span className="block truncate text-xs font-medium text-[#e2e4e9]">
-                        {PROJECTS[id].title}
-                      </span>
-                      <span className={`block truncate text-[11px] ${PROJECTS[id].accent}`}>
-                        {PROJECTS[id].tag}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </nav>
-              <nav aria-label="Site navigation">
-                <p className="px-2 pb-1 pt-3 text-[10px] uppercase tracking-wide text-[#6f737a]">
-                  Site
-                </p>
-                {SITE_LINKS.map((s) => (
-                  <Link
-                    key={s.href}
-                    href={s.href}
-                    className={`flex items-center gap-3 rounded-md px-2 py-2.5 hover:bg-white/5 ${focusRing}`}
-                  >
-                    <span className="flex h-6 w-8 shrink-0 items-center justify-center rounded border border-[#393b40] bg-[#2b2d30]">
-                      <Icon name={s.icon} size={15} />
-                    </span>
-                    <span className="text-xs font-medium text-[#e2e4e9]">{s.label}</span>
-                  </Link>
-                ))}
-              </nav>
-            </div>
+                    <span className="block truncate text-[11px] text-[#8a8f96]">{b.sub}</span>
+                  </span>
+                </button>
+              ))}
+            </nav>
           </div>
         )}
       </div>
@@ -636,10 +797,10 @@ export default function ProjectsPage() {
       <div className="flex shrink-0 items-center gap-1.5 border-t border-[#393b40] bg-[#2b2d30] px-3 py-1 text-[11px] text-[#9aa0a6]">
         <span>portfolio</span>
         <Crumb />
-        <span>projects</span>
+        <span>src</span>
         <Crumb />
-        <span className="text-[#e2e4e9]">{PROJECTS[activeTab].file}</span>
-        <span className="ml-auto hidden sm:inline">MD</span>
+        <span className="text-[#e2e4e9]">{FILE_META[activeTab].label}</span>
+        <span className="ml-auto hidden sm:inline">{FILE_META[activeTab].ext}</span>
         <span className="hidden sm:inline">UTF-8</span>
         <span>Ln {CODE[activeTab].length}, Col 1</span>
       </div>
